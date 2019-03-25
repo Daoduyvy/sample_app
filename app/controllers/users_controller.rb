@@ -16,6 +16,7 @@ def create
     @user = User.new(user_params)    # Not the final implementation!
     if @user.save
       log_in @user
+      remember user
       # Handle a successful save.
       flash[:success] = "Success"
       redirect_to @user
