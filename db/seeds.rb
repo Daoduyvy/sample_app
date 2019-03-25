@@ -10,8 +10,8 @@ User.create!(name:  "Dao Duy Vy",
              password:              "dvi180595",
              password_confirmation: "dvi180595",
              admin:     true,
-             activated: true,
-             activated_at: Time.zone.now)
+             activated: false
+             )
 
 99.times do |n|
   name  = Faker::Name.name

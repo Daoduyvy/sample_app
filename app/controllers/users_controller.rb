@@ -15,22 +15,22 @@ end
 def create
     @user = User.new(user_params)    # Not the final implementation!
     if @user.save
-      log_in @user
-      remember user
-      # Handle a successful save.
-      flash[:success] = "Success"
-      redirect_to @user
-    else
-      render 'new'
-    end
+     UserMailer.account_activation(@user).deliver_now
+     flash[:info] = "Please check your email to activate your account."
+     redirect_to root_url
+
+
+   else
+    render 'new'
   end
-  def edit
-    @user = User.find(params[:id])
-  end
-  def update
-    @user = User.find(params[:id])
-    if @user.update_attributes(user_params)
-      # Handle a successful update.
+end
+def edit
+  @user = User.find(params[:id])
+end
+def update
+  @user = User.find(params[:id])
+  if @user.update_attributes(user_params)
+    redirect_to login_url
     else
       render 'edit'
     end
@@ -51,7 +51,7 @@ def create
     # Confirms a logged-in user.
     def logged_in_user
       unless logged_in?
-        store_location
+
         flash[:danger] = "Please log in."
         redirect_to login_url
       end
