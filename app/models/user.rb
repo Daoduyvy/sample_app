@@ -1,15 +1,16 @@
 class User < ApplicationRecord
- attr_accessor :remember_token, :activation_token, :reset_token
- before_save { self.email = email.downcase}
- before_create :create_activation_digest
- validates :name , presence: true , length: { maximum: 50 }
- VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
- validates :email , presence: true , format: { with: VALID_EMAIL_REGEX ,
-  message: "only allows letters" } , length: { maximum: 255 } , uniqueness: { case_sensitive: false }
+  has_many :microposts, dependent: :destroy
+  attr_accessor :remember_token, :activation_token, :reset_token
+  before_save { self.email = email.downcase}
+  before_create :create_activation_digest
+  validates :name , presence: true , length: { maximum: 50 }
+  VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
+  validates :email , presence: true , format: { with: VALID_EMAIL_REGEX ,
+    message: "only allows letters" } , length: { maximum: 255 } , uniqueness: { case_sensitive: false }
 
-  has_secure_password
-  validates :password ,presence: true , length: { maximum: 50 }
-  class << self
+    has_secure_password
+    validates :password ,presence: true , length: { maximum: 50 }
+    class << self
      # Returns the hash digest of the given string.
      def digest(string)
       cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
@@ -27,9 +28,9 @@ def remember
  update_attribute(:remember_digest, User.digest(remember_token))
 end
  # Forgets a user.
-  def forget
-    update_attribute(:remember_digest, nil)
-  end
+ def forget
+  update_attribute(:remember_digest, nil)
+end
 # Returns true if the given token matches the digest.
 
 def authenticated?(attribute, token)
@@ -38,10 +39,10 @@ def authenticated?(attribute, token)
   BCrypt::Password.new(digest).is_password?(token)
 end
 # Activates an account.
-  def activate
-    update_attribute(:activated,    true)
-    update_attribute(:activated_at, Time.zone.now)
-  end
+def activate
+  update_attribute(:activated,    true)
+  update_attribute(:activated_at, Time.zone.now)
+end
 
   # Sends activation email.
   def send_activation_email
@@ -60,10 +61,10 @@ end
     UserMailer.password_reset(self).deliver_now
   end
 # Activates an account.
-  def activate
-    update_attribute(:activated,    true)
-    update_attribute(:activated_at, Time.zone.now)
-  end
+def activate
+  update_attribute(:activated,    true)
+  update_attribute(:activated_at, Time.zone.now)
+end
 
   # Sends activation email.
   def send_activation_email
@@ -85,7 +86,14 @@ end
   def password_reset_expired?
     reset_sent_at < 2.hours.ago
   end
-private
+
+    # Defines a proto-feed.
+  # See "Following users" for the full implementation.
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
+
+  private
 
     # Converts email to all lower-case.
     def downcase_email
@@ -99,7 +107,7 @@ private
     end
 
      # Converts email to all lower-case.
-    def downcase_email
+     def downcase_email
       self.email = email.downcase
     end
 
